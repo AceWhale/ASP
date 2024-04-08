@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using ASP.Models.Home.Signup;
+using System.Text.RegularExpressions;
 
 namespace ASP.Controllers
 {
@@ -197,7 +198,7 @@ namespace ASP.Controllers
 			{
 				pageModel.ValidationErrors = _ValidateSingupModel(formModel);
 			}
-			_logger.LogInformation(Directory.GetCurrentDirectory());
+			//_logger.LogInformation(Directory.GetCurrentDirectory());
             return View(pageModel);
         }
 
@@ -230,13 +231,33 @@ namespace ASP.Controllers
 				}
 				if (model.UserAvatar != null)
 				{
-					// є файл, аналізуємо його
-					// Дізнаємось розширення файлу:
-					int dotPosition = model.UserAvatar.FileName.LastIndexOf('.');
-					if(dotPosition == -1)
-						result[nameof(model.UserAvatar)] = "File without extension not allowed";
-					String ext = model.UserAvatar.FileName[dotPosition..];
-					// 
+					string ext = Path.GetExtension(model.UserAvatar.FileName);
+					List<string> imageExtensions = new List<string>() { ".png", ".jpg", ".jpeg", ".svg", ".bmp", ".gif", ".webp" };
+					if (!imageExtensions.Contains(ext))
+						result[nameof(model.UserAvatar)] = "User Avatar must be an image type (.png, .jpg, .jpeg, .svg, .bmp, .gif, .webp)";
+				}
+				if(!model.Agreement)
+				{
+					result[nameof(model.Agreement)] = "User Agreement must be checked";
+				}
+				if (String.IsNullOrEmpty(model.Password))
+				{
+					result[nameof(model.Password)] = "User Password should not be empty";
+				}
+				if (!String.IsNullOrEmpty(model.Password))
+				{
+					Regex regex = new Regex(@"^(?=.*[A-Za-z])(?=.*\d).+$");
+					if (!regex.IsMatch(model.Password))
+						result[nameof(model.Password)] = "User Password should contain 1 symbol and 1 digit";
+				}
+				if (String.IsNullOrEmpty(model.UserRepeat))
+				{
+					result[nameof(model.UserRepeat)] = "User Repeat Password should not be empty";
+				}
+				if (!String.IsNullOrEmpty(model.Password))
+				{
+					if (!(model.UserRepeat == model.Password))
+						result[nameof(model.UserRepeat)] = "User Passwords not the same";
 				}
 			}
 			return result;

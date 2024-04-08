@@ -6,7 +6,7 @@
 	bool isSignUpSuccess = 
 		Model.FormModel?.HasData == true && Model.ValidationErrors?.Count == 0;
 	Dictionary<string, string> classes = new();
-	foreach (String key in new String[] { "UserName", "UserEmail", "UserBirthdate" })
+	foreach (String key in new String[] { "UserName", "UserEmail", "UserBirthdate", "UserAvatar", "Agreement", "Password", "UserRepeat" })
 	{
 		classes[key] = isFormInvalid?
 		(Model.ValidationErrors?.ContainsKey(key) ?? false
@@ -62,17 +62,20 @@
 		<div class="col">
 			<div class="input-group mb-3">
 				<span class="input-group-text" id="user-password"><i class="bi bi-lock"></i></span>
-				<input type="password" class="form-control" placeholder="Пароль"
+				<input type="password" class="form-control @classes["Password"]" placeholder="Пароль"
 					   name="user-password"
+					   value="@(isFormInvalid ? Model.FormModel!.Password : "")"
 					   aria-label="UserPassword" aria-describedby="user-password">
+				<div class="invalid-feedback">Введен неверный пароль</div>
 			</div>
 		</div>
 		<div class="col">
 			<div class="input-group mb-3">
 				<span class="input-group-text" id="user-repeat"><i class="bi bi-unlock"></i></span>
-				<input type="password" class="form-control" placeholder="Повторiть пароль"
+				<input type="password" class="form-control @classes["UserRepeat"]" placeholder="Повторiть пароль"
 					   name="user-repeat"
 					   aria-label="Repeat" aria-describedby="user-repeat">
+				<div class="invalid-feedback">Пароли не совпадают</div>
 			</div>
 		</div>
 
@@ -92,7 +95,9 @@
 		<div class="col">
 			<div class="input-group mb-3">
 				<label class="input-group-text" for="user-avatar"><i class="bi bi-person-circle"></i></label>
-				<input type="file" class="form-control" name="user-avatar" id="user-avatar">
+				<input type="file" class="form-control @classes["UserAvatar"]" name="user-avatar" id="user-avatar"
+					   aria-label="UserAvatar" aria-describedby="user-avatar">
+				<div class="invalid-feedback">Файл должен быть типа изображения</div>
 			</div>
 		</div>
 
@@ -102,7 +107,8 @@
 		<div class="col">
 			<div class="form-check">
 				<input class="form-check-input" name="user-agreement" type="checkbox" value="true" id="user-agreement">
-				<label class="form-check-label" for="agreement">Погоджуюсь із правилами сайту</label>
+				<label class="form-check-label @classes["Agreement"]" for="agreement">Погоджуюсь із правилами сайту</label>
+				<div class="invalid-feedback">Нужно потвердить соглашение с правилами сайта</div>
 			</div>
 		</div>
 		<div class="col">
