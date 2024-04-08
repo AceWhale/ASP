@@ -6,6 +6,7 @@ using ASP.Services.Hash;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
+using ASP.Models.Home.Signup;
 
 namespace ASP.Controllers
 {
@@ -79,7 +80,7 @@ namespace ASP.Controllers
 			FrontendFormOutput output = new()
 			{
 				Code = 200,
-				Message = $"{input.UserName} -- {input.UserEmail}"
+				Message = $"{input.UserName} -- {input.UserEmail} -- {input.UserGen} -- {input.UserDate.ToString().Substring(0, 10)}"
 			};
 			_logger.LogInformation(output.Message);
 			return Json(output);
@@ -176,21 +177,69 @@ namespace ASP.Controllers
 			return View(uRLStructPage);
 		}
 
-		public IActionResult Privacy()
-		{
-			Models.Home.Privacy.PrivacyPageModel privacyPage = new()
-			{
-				TabHeader = "Privacy",
-				PageTitle = "Privacy Policy",
-				PageText = "Use this page to detail your site's privacy policy."
+        public IActionResult Privacy()
+        {
+            Models.Home.Privacy.PrivacyPageModel privacyPage = new()
+            {
+                TabHeader = "Privacy",
+                PageTitle = "Privacy Policy",
+                PageText = "Use this page to detail your site's privacy policy."
             };
-			return View(privacyPage);
-		}
+            return View(privacyPage);
+        }
+        public IActionResult Signup(SingupFormModel? formModel)
+        {
+			SingupPageModel pageModel = new()
+			{
+				FormModel = formModel
+			};
+			if(formModel?.HasData ?? false)
+			{
+				pageModel.ValidationErrors = _ValidateSingupModel(formModel);
+			}
+			_logger.LogInformation(Directory.GetCurrentDirectory());
+            return View(pageModel);
+        }
 
 		[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
 		public IActionResult Error()
 		{
 			return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+		}
+
+		private Dictionary<string, string> _ValidateSingupModel(SingupFormModel? model)
+		{
+			Dictionary<string, string> result = new();
+			if (model == null)
+			{
+				result["model"] = "Model is Null";
+			}
+			else
+			{
+				if (String.IsNullOrEmpty(model.UserName))
+				{
+					result[nameof(model.UserName)] = "User Name should not be empty";
+				}
+				if (String.IsNullOrEmpty(model.UserEmail))
+				{
+					result[nameof(model.UserEmail)] = "User Email should not be empty";
+				}
+				if (model.UserBirthdate == default(DateTime))
+				{
+					result[nameof(model.UserBirthdate)] = "User Birthdate should not be empty";
+				}
+				if (model.UserAvatar != null)
+				{
+					// є файл, аналізуємо його
+					// Дізнаємось розширення файлу:
+					int dotPosition = model.UserAvatar.FileName.LastIndexOf('.');
+					if(dotPosition == -1)
+						result[nameof(model.UserAvatar)] = "File without extension not allowed";
+					String ext = model.UserAvatar.FileName[dotPosition..];
+					// 
+				}
+			}
+			return result;
 		}
 	}
 }
