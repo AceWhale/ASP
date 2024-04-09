@@ -35,5 +35,6 @@ namespace ASP.Models.Home.Signup
 		[FromForm(Name = "signup-button")]
 		public bool HasData { get; set; } = false;
 
+		public String? SavedAvatarFilename { get; set; } 
 	}
 }

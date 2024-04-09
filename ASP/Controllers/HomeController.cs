@@ -8,6 +8,8 @@ using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using ASP.Models.Home.Signup;
 using System.Text.RegularExpressions;
+using ASP.Data.DAL;
+using ASP.Services.Kdf;
 
 namespace ASP.Controllers
 {
@@ -24,7 +26,8 @@ namespace ASP.Controllers
 
 		// інжекція контексту даних - така ж за формою, як інші сервіси
 		private readonly DataContext _dataContext;
-
+		private readonly DataAccessor _dataAccessor;
+		private readonly IKdfService _kdfService;
 
 		private readonly ILogger<HomeController> _logger;
 
@@ -32,11 +35,13 @@ namespace ASP.Controllers
 		private readonly IHashService _hashService;
 
 		//додаємо до конструктора параметр-залежність і зберігаємо її у тілі
-		public HomeController(IHashService hashService, ILogger<HomeController> logger, DataContext dataContext)
+		public HomeController(IHashService hashService, ILogger<HomeController> logger, DataContext dataContext, DataAccessor dataAccessor, IKdfService kdfService)
 		{
 			_logger = logger;               // Збереження переданих залежностей, що їх
 			_hashService = hashService;     // передає контейнер при створенні контролера
 			_dataContext = dataContext;
+			_dataAccessor = dataAccessor;
+			_kdfService = kdfService;
 		}
 		public IActionResult Index()
 		{
@@ -197,6 +202,19 @@ namespace ASP.Controllers
 			if(formModel?.HasData ?? false)
 			{
 				pageModel.ValidationErrors = _ValidateSingupModel(formModel);
+				if(pageModel.ValidationErrors.Count == 0)
+				{
+					String salt = RandomStringService.GenerateSalt(10);
+					_dataAccessor.UserDao.Signup(new()
+					{
+						Name = formModel.UserName,
+						Email = formModel.UserEmail,
+						Birthdate = formModel.UserBirthdate,
+						AvatarUrl = formModel.SavedAvatarFilename,
+						Salt = salt,
+						Derivedkey = _kdfService.DerivedKey(salt, formModel.Password)
+					});
+				}
 			}
 			//_logger.LogInformation(Directory.GetCurrentDirectory());
             return View(pageModel);
@@ -235,8 +253,25 @@ namespace ASP.Controllers
 					List<string> imageExtensions = new List<string>() { ".png", ".jpg", ".jpeg", ".svg", ".bmp", ".gif", ".webp" };
 					if (!imageExtensions.Contains(ext))
 						result[nameof(model.UserAvatar)] = "User Avatar must be an image type (.png, .jpg, .jpeg, .svg, .bmp, .gif, .webp)";
+					// сохраняем файл в wwwroot/img/avatars с новыми именами
+					// (переданные имена не рекомендовано оставлять)
+					String path = Directory.GetCurrentDirectory() + "/wwwroot/img/avatars/";
+					_logger.LogInformation(path);
+					String fileName;
+					String pathName;
+					do
+					{
+						fileName = RandomStringService.GenerateFilename(10) + ext;
+						pathName = path + fileName;
+					}
+					while (System.IO.File.Exists(pathName));
+					_logger.LogInformation(pathName);
+
+					model.UserAvatar.CopyTo(System.IO.File.OpenWrite(pathName));
+
+					model.SavedAvatarFilename = fileName;
 				}
-				if(!model.Agreement)
+				if (!model.Agreement)
 				{
 					result[nameof(model.Agreement)] = "User Agreement must be checked";
 				}
