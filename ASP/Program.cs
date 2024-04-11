@@ -1,5 +1,6 @@
 using ASP.Data;
 using ASP.Data.DAL;
+using ASP.Middleware;
 using ASP.Services.Hash;
 using ASP.Services.Kdf;
 using Microsoft.EntityFrameworkCore;
@@ -31,6 +32,17 @@ builder.Services.AddDbContext<DataContext>(
 builder.Services.AddSingleton<DataAccessor>();
 builder.Services.AddSingleton<IKdfService, Pbkdf1Service>();
 
+
+// Налаштування Http-сесiй
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+	options.IdleTimeout = TimeSpan.FromSeconds(10);
+	options.Cookie.HttpOnly = true;
+	options.Cookie.IsEssential = true;
+});
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -51,6 +63,13 @@ app.UseCors(builder => builder
 				.AllowCredentials());
 
 app.UseAuthorization();
+
+// Підключення Http-сесiй
+app.UseSession();
+
+// Підключення нашого Middleware
+//app.UseMiddleware<AuthSessionMiddleware>();
+app.UseAuthSession();
 
 app.MapControllerRoute(
 	name: "default",

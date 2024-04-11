@@ -1,13 +1,18 @@
-﻿namespace ASP.Data.DAL
+﻿using ASP.Services.Kdf;
+
+namespace ASP.Data.DAL
 {
 	public class DataAccessor
 	{
-		public readonly DataContext _dataContext;
+		private readonly DataContext _dataContext;
+		private readonly IKdfService _kdfService;
+
 		public UserDao UserDao { get; private set; }
-		public DataAccessor(DataContext dataContext)
+		public DataAccessor(DataContext dataContext, IKdfService kdfService)
 		{
 			_dataContext = dataContext;
-			UserDao = new UserDao(dataContext);
+			_kdfService = kdfService;
+			UserDao = new UserDao(dataContext, kdfService);
 		}
 	}
 }
