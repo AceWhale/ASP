@@ -60,10 +60,16 @@
 							<a class="nav-link text-dark" asp-area="" title="Мoделі в ASP"
 							   asp-controller="Home" asp-action="Model"><i class="bi bi-clipboard-data"></i></a>
 						</li>
+						<li class="nav-item">
+							<a class="nav-link text-dark" asp-area="" title="Адміністрування контенту"
+							   asp-controller="Home" asp-action="Admin"><i class="bi bi-pencil-square"></i></a>
+						</li>
 					</ul>
 					@if (isAuthenticated)
 					{
 						<img class="user_logo" src="/img/avatars/@(avatar == "" ? "no-avatar.png" : avatar)" alt="avatar" />
+						<a class="nav-link text-dark" asp-area="" title="Вихiд"
+						   asp-controller="Home" asp-route-logout="true" asp-action="Index"><i class="bi bi-box-arrow-right"></i></a>
 					}
 					else
 					{

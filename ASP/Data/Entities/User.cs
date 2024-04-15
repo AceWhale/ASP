@@ -13,3 +13,10 @@
 		public DateTime? Birthdate { get; set; }
 	}
 }
+
+
+/*
+*	Category: Hotels Apartments Resorts Villas
+*	Location: Hotel1 Hotel2 Hotel3
+*	Room: Room101 Room102 Room103
+*/
