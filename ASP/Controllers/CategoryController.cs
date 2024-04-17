@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ASP.Data.Entities;
 using ASP.Data.DAL;
+using ASP.Models;
 
 namespace ASP.Controllers
 {
@@ -22,11 +23,26 @@ namespace ASP.Controllers
 		}
 
 		[HttpPost]
-		public String DoPost([FromBody] CategoryPostModel model)
+		public String DoPost([FromForm] CategoryPostModel model)
 		{
 			try
 			{
-				_dataAccessor.ContentDao.AddCategory(model.Name, model.Description);
+				String? fileName = null;
+				if (model.Photo != null)
+				{
+					string ext = Path.GetExtension(model.Photo.FileName);
+					String path = Directory.GetCurrentDirectory() + "/wwwroot/img/content/";
+					String pathName;
+					do
+					{
+						fileName = Guid.NewGuid() + ext;
+						pathName = path + fileName;
+					}
+					while (System.IO.File.Exists(pathName));
+					using var steam = System.IO.File.OpenWrite(pathName);
+					model.Photo.CopyTo(steam);
+				}
+				_dataAccessor.ContentDao.AddCategory(model.Name, model.Description, fileName);
 				Response.StatusCode = StatusCodes.Status201Created;
 				return "OK";
 			}
@@ -42,6 +58,6 @@ namespace ASP.Controllers
 	{
 		public String Name { get; set; }
 		public String Description { get; set; }
-
+		public IFormFile? Photo { get; set; } 
 	}
 }

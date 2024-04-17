@@ -1,5 +1,6 @@
 ﻿using ASP.Data.DAL;
 using ASP.Data.Entities;
+using ASP.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,15 +23,32 @@ namespace ASP.Controllers
 		}
 
 		[HttpPost]
-		public String Post([FromBody] LocationPostModel model)
+		public String Post([FromForm] LocationPostModel model)
 		{
 			try
 			{
+				String? fileName = null;
+				if (model.Photo != null)
+				{
+					string ext = Path.GetExtension(model.Photo.FileName);
+					String path = Directory.GetCurrentDirectory() + "/wwwroot/img/content/";
+					String pathName;
+					do
+					{
+						fileName = RandomStringService.GenerateFilename(10) + ext;
+						pathName = path + fileName;
+					}
+					while (System.IO.File.Exists(pathName));
+
+					using var steam = System.IO.File.OpenWrite(pathName);
+					model.Photo.CopyTo(steam);
+				}
 				_dataAccessor.ContentDao.AddLocation(
 					name: model.Name,
 					description: model.Description,
 					CategoryId: model.CategoryId,
-					Stars: model.Stars);
+					Stars: model.Stars,
+					PhotoUrl: fileName);
 				Response.StatusCode = StatusCodes.Status201Created;
 				return "OK";
 			}
@@ -47,6 +65,7 @@ namespace ASP.Controllers
 		public String Name { get; set; }
 		public String Description { get; set; }
 		public Guid CategoryId { get; set; }
-		public int Stars {  get; set; }
+		public int Stars { get; set; }
+		public IFormFile Photo { get; set; }
 	}
 }

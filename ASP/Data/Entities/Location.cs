@@ -11,5 +11,7 @@
 		public string Name { get; set; } = null!;
 		public string Description { get; set; } = null!;
 		public DateTime? DeleteDt { get; set; }  // ознака видалення 
+
+		public String? PhotoUrl { get; set; }
 	}
 }

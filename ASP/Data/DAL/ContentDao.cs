@@ -4,27 +4,35 @@ namespace ASP.Data.DAL
 {
 	public class ContentDao
 	{
+		private readonly Object _dblocker;
 		private readonly DataContext _context;
-		public ContentDao(DataContext context)
+		public ContentDao(DataContext context, object dblocker)
 		{
 			_context = context;
+			_dblocker = dblocker;
 		}
-		public void AddCategory(String name, String description)
+		public void AddCategory(String name, String description, String? photoUrl)
 		{
 			_context.Categories.Add(new()
 			{
 				Id = Guid.NewGuid(),
 				Name = name,
 				Description = description,
-				DeleteDt = null
+				DeleteDt = null,
+				PhotoUrl = photoUrl
 			});
 			_context.SaveChanges();
 		}
 		public List<Category> GetCategories()
 		{
-			return _context.Categories
+			List<Category> list;
+			lock (_dblocker)
+			{
+				list = _context.Categories
 				.Where(c => c.DeleteDt == null)
 				.ToList();
+			}
+			return list;
 		}
 		public void UpdateCategory(Category category)
 		{
@@ -56,21 +64,25 @@ namespace ASP.Data.DAL
 		}
 		public void AddLocation(String name, String description, Guid CategoryId,
 			int? Stars = null, Guid? CountryId = null,
-			Guid? CityId = null, string? Address = null)
+			Guid? CityId = null, string? Address = null, String? PhotoUrl = null)
 		{
-			_context.Locations.Add(new()
+			lock (_dblocker)
 			{
-				Id = Guid.NewGuid(),
-				Name = name,
-				Description = description,
-				CategoryId = CategoryId,
-				Stars = Stars,
-				CountryId = CountryId,
-				CityId = CityId,
-				Address = Address,
-				DeleteDt = null
-			});
-			_context.SaveChanges();
+				_context.Locations.Add(new()
+				{
+					Id = Guid.NewGuid(),
+					Name = name,
+					Description = description,
+					CategoryId = CategoryId,
+					Stars = Stars,
+					CountryId = CountryId,
+					CityId = CityId,
+					Address = Address,
+					DeleteDt = null,
+					PhotoUrl = PhotoUrl
+				});
+				_context.SaveChanges();
+			}
 		}
 
 		public List<Location> GetLocations(Guid? categoryId = null)
@@ -78,7 +90,7 @@ namespace ASP.Data.DAL
 			var query = _context
 				.Locations
 				.Where(loc => loc.DeleteDt == null);
-			if(categoryId != null)
+			if (categoryId != null)
 			{
 				query = query.Where(loc => loc.CategoryId == categoryId);
 			}

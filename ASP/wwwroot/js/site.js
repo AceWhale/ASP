@@ -48,32 +48,81 @@ function loadCategories() {
         .then(j => {
             let html = "";
             for (let ctg of j) {
-                html += "<p>" + ctg["name"] + "</p>";
+                html += `<p data-id="${ctg["id"]}" onclick="ctgClick('${ctg["id"]}')">${ctg["name"] }</p>`;
             }
             html += `Назва: <input id="ctg-name" /><br/>
             Опис: <textarea id="ctg-description"></textarea><br/>
+            Фото: <input type="file" id="ctg-photo" /><br/>
             <button onclick='addCategory()'>+</button>`;
             container.innerHTML = html;
         });
 
 }
+function ctgClick(ctgid) {
+    //const ctgid = e.target.closest('[data-id]').getAttribute('data-id');
+    fetch("/api/location?categoryId=" + ctgid)
+        .then(r => r.json())
+        .then(j => {
+            const container = document.getElementById("location-container");
+            let html = "";
+            for (let loc of j) {
+                html += `<p data-id="${loc["id"]}" onclick="locClick(event)">${loc["name"]}</p>`;
+            }
+            html += `Назва: <input id="loc-name" /><br/>
+            Опис: <textarea id="loc-description"></textarea><br/>
+            Рейтинг: <input id="loc-stars" type="number"/><br/>
+            Фото: <input type="file" id="loc-photo" /><br/>
+            <button onclick='addLocation("${ctgid}")'>+</button>`;
+            container.innerHTML = html;
+        });
+}
+
 function addCategory() {
     const ctgName = document.getElementById("ctg-name").value;
     const ctgDescription = document.getElementById("ctg-description").value;
+    const ctgPhoto = document.getElementById("ctg-photo");
+
     if (confirm(`Додаємо категорію ${ctgName} ${ctgDescription} ?`)) {
+        let formData = new FormData();
+        formData.append("name", ctgName);
+        formData.append("description", ctgDescription);
+        formData.append("photo", ctgPhoto.files[0]);
+
         fetch("/api/category", {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                'name': ctgName,
-                'description': ctgDescription
-            })
+            body: formData
         })
             .then(r => {
                 if (r.status == 201) {
                     loadCategories();
+                }
+                else {
+                    alert("error");
+                }
+            });
+    }
+}
+
+
+function addLocation(ctgid) {
+    const ctgName = document.getElementById("loc-name").value;
+    const ctgDescription = document.getElementById("loc-description").value;
+    const ctgStars = document.getElementById("loc-stars").value;
+    const locPhoto = document.getElementById("loc-photo");
+    if (confirm(`Додаємо локацiю ${ctgName} ${ctgDescription} ${ctgStars} ?`)) {
+        let formData = new FormData();
+        formData.append("categoryId", ctgid);
+        formData.append("name", ctgName);
+        formData.append("description", ctgDescription);
+        formData.append("stars", ctgStars);
+        formData.append("photo", locPhoto.files[0]);
+        fetch("/api/location", {
+            method: 'POST',
+            body: formData
+        })
+            .then(r => {
+                if (r.status == 201) {
+                    ctgClick(ctgid);
                 }
                 else {
                     alert("error");

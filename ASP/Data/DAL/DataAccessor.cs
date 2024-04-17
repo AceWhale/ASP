@@ -4,6 +4,8 @@ namespace ASP.Data.DAL
 {
 	public class DataAccessor
 	{
+		private readonly Object _dblocker = new Object(); 
+
 		private readonly DataContext _dataContext;
 		private readonly IKdfService _kdfService;
 
@@ -13,8 +15,8 @@ namespace ASP.Data.DAL
 		{
 			_dataContext = dataContext;
 			_kdfService = kdfService;
-			UserDao = new UserDao(dataContext, kdfService);
-			ContentDao = new(_dataContext);
+			UserDao = new UserDao(dataContext, kdfService, _dblocker);
+			ContentDao = new(_dataContext, _dblocker);
 		}
 	}
 }
