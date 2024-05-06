@@ -3,6 +3,7 @@ using ASP.Data.Entities;
 using ASP.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Web;
 
 namespace ASP.Controllers
 {
@@ -16,10 +17,10 @@ namespace ASP.Controllers
 			_dataAccessor = dataAccessor;
 		}
 
-		[HttpGet]
-		public List<Location> DoGet(Guid? categoryId)
+		[HttpGet("{id}")]
+		public List<Location> DoGet(String id)
 		{
-			return _dataAccessor.ContentDao.GetLocations(categoryId);
+			return _dataAccessor.ContentDao.GetLocations(id);
 		}
 
 		[HttpPost]
@@ -27,7 +28,7 @@ namespace ASP.Controllers
 		{
 			try
 			{
-				String? fileName = null;
+                String? fileName = null;
 				if (model.Photo != null)
 				{
 					string ext = Path.GetExtension(model.Photo.FileName);

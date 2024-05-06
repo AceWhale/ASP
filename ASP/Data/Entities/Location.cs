@@ -13,5 +13,7 @@
 		public DateTime? DeleteDt { get; set; }  // ознака видалення 
 
 		public String? PhotoUrl { get; set; }
-	}
+
+        public String? Slug { get; set; }
+    }
 }

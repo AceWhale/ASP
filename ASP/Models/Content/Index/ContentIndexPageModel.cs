@@ -4,6 +4,6 @@ namespace ASP.Models.Content.Index
 {
     public class ContentIndexPageModel
     {
-        public List<Category> Categories { get; set; } = [];
+        public List<Data.Entities.Category> Categories { get; set; } = [];
     }
 }
