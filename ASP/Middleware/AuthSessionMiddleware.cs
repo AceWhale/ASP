@@ -35,7 +35,8 @@ namespace ASP.Middleware
                     new (ClaimTypes.Email,      user.Email),
                     new (ClaimTypes.Name,       user.Name),
                     new (ClaimTypes.UserData,   user.AvatarUrl ?? ""),
-                    new (ClaimTypes.Role,       user.Role ?? "")
+                    new (ClaimTypes.Role,       user.Role ?? ""),
+                    new ("EmailConfirmCode",    user.EmailConfirmCode ?? "")
                     };
 
                     context.User = new ClaimsPrincipal(
