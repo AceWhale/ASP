@@ -55,12 +55,14 @@
 document.addEventListener('DOMContentLoaded', function () {
     const authButton = document.getElementById("auth-button");
     if (authButton) authButton.addEventListener('click', authButtonClick);
+    
+    const confirmEmailButton = document.getElementById("confirm-email-button");
+    if (confirmEmailButton) confirmEmailButton.addEventListener('click', confirmEmailClick);
 
     initAdminPage();
     serveReserveButtons();
     serveAdminButtons();
 });
-
 
 function serveAdminButtons() {
     for (let btn of document.querySelectorAll('[data-type="edit-category"]')) {
@@ -77,7 +79,6 @@ function serveAdminButtons() {
         });
     }
 }
-
 
 function authButtonClick() {
     const authEmail = document.getElementById("auth-email");
@@ -108,6 +109,30 @@ function authButtonClick() {
         });
 }
 
+function confirmEmailClick() {
+    const emailCodeInput = document.getElementById("email-code");
+    if (!emailCodeInput) throw "Element '#email-code' not found!"
+    const emailhMessage = document.getElementById("email-message");
+    if (!emailhMessage) throw "Element '#email-message' not found!"
+    const code = emailCodeInput.value.trim();
+    if (!code) {
+        emailhMessage.classList.remove('visually-hidden');
+        emailhMessage.innerText = "Hеобхідно ввести код";
+        return;
+    }
+    const email = emailCodeInput.getAttribute("data-email");
+
+    fetch(`/api/auth?email=${email}&code=${code}`, { method: 'PATCH' })
+        .then(r => {
+            if (r.status === 202) {
+                window.location.reload();
+            }
+            else {
+                emailhMessage.classList.remove('visually-hidden');
+                emailhMessage.innerText = "Код не прийнято"
+            }
+        });
+}
 
 
 ///// ADMIN PAGE //////

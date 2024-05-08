@@ -20,7 +20,9 @@ namespace ASP.Controllers
                 MailMessage mailMessage = new()
                 {
                     IsBodyHtml = true,
-                    Body = $"<h1>Шановний користувач !</h1><p style='color: steelblue'>Вiтаємо на сaйTi <a href='{Request.Host}'>ASP</a></p>"
+                    Body = $"<h1>Шановний користувач !</h1>" +
+                    $"<p style='color: steelblue'>Вiтаємо на сaйTi " +
+                    $"<a href='{Request.Host}'>ASP</a></p>"
                 };
                 mailMessage.To.Add(new MailAddress("proviryalovich@gmail.com"));
                 _emailService.Send(mailMessage);

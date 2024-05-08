@@ -53,7 +53,7 @@ namespace ASP.Controllers
 				Response.StatusCode = StatusCodes.Status201Created;
 				return "OK";
 			}
-			catch (Exception ex)
+			catch
 			{
 				Response.StatusCode = StatusCodes.Status400BadRequest;
 				return "Error";
@@ -69,10 +69,10 @@ namespace ASP.Controllers
 
 	public class LocationPostModel
 	{
-		public String Name { get; set; }
-		public String Description { get; set; }
+		public String? Name { get; set; }
+		public String? Description { get; set; }
 		public Guid CategoryId { get; set; }
 		public int Stars { get; set; }
-		public IFormFile Photo { get; set; }
+		public IFormFile? Photo { get; set; }
 	}
 }

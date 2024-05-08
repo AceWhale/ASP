@@ -4,6 +4,8 @@
 	String avatar = isAuthenticated
 	? Context.User.Claims.First(claim => claim.Type == ClaimTypes.UserData).Value
 	: "";
+	String email = Context.User.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Email)?.Value ?? "";
+
 	String emailConfirmCode = Context.User.Claims.FirstOrDefault(claim => claim.Type == "EmailConfirmCode")?.Value ?? "";
 
 	bool isEmailConfirmed = emailConfirmCode == "";
@@ -156,8 +158,9 @@
 					<div class="row">
 						<div class="input-group mb-3">
 							<span class="input-group-text" id="email-code-icon"><i class="bi bi-123"></i></span>
-							<input type="text" id="email-code" class="form-control" placeholder="code"
-								   aria-label="Email" aria-describedby="email-code-icon">
+							<input type="text" id="email-code" class="form-control" placeholder="Code"
+								   aria-label="Email" aria-describedby="email-code-icon"
+								   data-email="@email">
 						</div>
 					</div>
 				</div>
@@ -165,7 +168,7 @@
 					<div id="email-message" class="alert alert-warning visually-hidden" role="alert">
 					</div>
 					<div class="spacer"></div>
-					<button type="button" class="btn btn-primary" id="email-button">Пiдтвердити</button>
+					<button type="button" class="btn btn-primary" id="confirm-email-button">Пiдтвердити</button>
 				</div>
 			</div>
 		</div>
