@@ -9,6 +9,7 @@ namespace ASP.Data
 		public DbSet<Entities.Location> Locations { get; set; }
 		public DbSet<Entities.Room> Rooms { get; set; }
 		public DbSet<Entities.Reservation> Reservations { get; set; }
+		public DbSet<Entities.Token> Tokens { get; set; }
 
 		public DataContext(DbContextOptions options) : base(options) { }
 
@@ -40,7 +41,9 @@ namespace ASP.Data
 				.WithMany(r=> r.Reservations)
 				.HasForeignKey(r => r.RoomId);
 
-
+			modelBuilder.Entity<Entities.Token>()
+				.HasOne(t => t.User)
+				.WithMany();
         }
     }
 }

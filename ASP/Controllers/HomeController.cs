@@ -12,10 +12,11 @@ using ASP.Data.DAL;
 using ASP.Services.Kdf;
 using ASP.Services.Email;
 using System.Net.Mail;
+using ASP.Models.Home.Signup.MailTemplates;
 
 namespace ASP.Controllers
 {
-	public class HomeController : Controller
+    public class HomeController : Controller
 	{
 		/* Інжекція сервісів (залежностей) - запит у контейнера
         на передачу посилань на відповідні об'єкти. Найбільш
@@ -236,13 +237,19 @@ namespace ASP.Controllers
 					$"{formModel.UserEmail}:{code}"));
 				if (pageModel.ValidationErrors.Count == 0)
 				{
+					SignupMailModel signupMail = new SignupMailModel()
+					{
+						Code = code,
+						User = formModel.UserName,
+						Slug = slug,
+						Scheme = Request.Scheme,
+						Host = Request.Host.ToString()
+                    };
 					MailMessage mailMessage = new()
 					{
-						Subject = "Подтверждение почты",
+						Subject = signupMail.GetSubject(),
 						IsBodyHtml = true,
-						Body = "<p>Для подтверждения почты введите на сайте код</p>" +
-						$"<h2 style='color: orange'>{code}</h2>" +
-						$"<p>Або перейдiть за <a href='{Request.Scheme}://{Request.Host}/Home/ConfirmEmail/{slug}'>цим посиланням</a></p>"
+						Body = signupMail.GetBody()
 					};
 					_logger.LogInformation(mailMessage.Body);
 					mailMessage.To.Add(formModel.UserEmail);

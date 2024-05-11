@@ -55,7 +55,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     const authButton = document.getElementById("auth-button");
     if (authButton) authButton.addEventListener('click', authButtonClick);
-    
+
     const confirmEmailButton = document.getElementById("confirm-email-button");
     if (confirmEmailButton) confirmEmailButton.addEventListener('click', confirmEmailClick);
 
@@ -76,6 +76,50 @@ function serveAdminButtons() {
                 b.getAttribute("data-category-description");
             document.querySelector('[name = "category-slug"]').value =
                 b.getAttribute("data-category-slug");
+        });
+    }
+    for (let btn of document.querySelectorAll('[data-type="delete-category"]')) {
+        btn.addEventListener("click", e => {
+            let b = e.target.closest('[data-type="delete-category"]');
+            let id = b.getAttribute("data-category-id");
+            if (id) {
+                if (confirm("Ви підтверджуєте видалення категорії?")) {
+                    fetch(`/api/category/${id}`, { method: 'DELETE' }).then(r => {
+                        if (r.status < 400) {
+                            window.location.reload();
+                        }
+                        else {
+                            alert("Виникла помилка видалення");
+                        }
+                    })
+                }
+            }
+            else {
+                alert("Помилка розмітки - немає id елемента");
+            }
+        });
+    }
+
+    for (let btn of document.querySelectorAll('[data-type="restore-category"]')) {
+        btn.addEventListener("click", e => {
+            let b = e.target.closest('[data-type="restore-category"]');
+            let id = b.getAttribute("data-category-id");
+            if (id) {
+                if (confirm("Ви підтверджуєте вiдновлення категорії?")) {
+                    fetch(`/api/category?id=${id}`, { method: 'RESTORE' }).then(r => {
+                        if (r.status < 400) {
+                            window.location.reload();
+                            //r.text().then(console.log);
+                        }
+                        else {
+                            alert("Виникла помилка вiдновлення");
+                        }
+                    })
+                }
+            }
+            else {
+                alert("Помилка розмітки - немає id елемента");
+            }
         });
     }
 }
