@@ -59,6 +59,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const confirmEmailButton = document.getElementById("confirm-email-button");
     if (confirmEmailButton) confirmEmailButton.addEventListener('click', confirmEmailClick);
 
+    const confirmPasswordButton = document.getElementById("confirm-password-button");
+    if (confirmPasswordButton) confirmPasswordButton.addEventListener('click', restoreUserPassword);
+
     initAdminPage();
     serveReserveButtons();
     serveAdminButtons();
@@ -174,6 +177,45 @@ function confirmEmailClick() {
             else {
                 emailhMessage.classList.remove('visually-hidden');
                 emailhMessage.innerText = "Код не прийнято"
+            }
+        });
+}
+
+function restoreUserPassword() {
+    const emailInput = document.getElementById("password-email");
+    if (!emailInput) throw "Element '#password-email' not found!"
+
+    const passNameInput = document.getElementById("password-name");
+    if (!passNameInput) throw "Element '#password-name' not found!"
+
+    const passwordMessage = document.getElementById("password-message-error");
+    if (!passwordMessage) throw "Element '#password-message-error' not found!"
+
+    const passwordMessageSuccess = document.getElementById("password-message-success");
+    if (!passwordMessageSuccess) throw "Element '#password-message-success' not found!"
+
+    if (!emailInput.value) {
+        passwordMessage.classList.remove('visually-hidden');
+        passwordMessageSuccess.classList.add('visually-hidden');
+        passwordMessage.innerText = "Hеобхідно ввести Email";
+        return;
+    }
+    if (!passNameInput.value) {
+        passwordMessage.classList.remove('visually-hidden');
+        passwordMessageSuccess.classList.add('visually-hidden');
+        passwordMessage.innerText = "Hеобхідно ввести UserName";
+        return;
+    }
+
+    fetch(`/api/auth?email=${emailInput.value}&username=${passNameInput.value}`, { method: 'RESTORE' })
+        .then(r => {
+            if (r.status === 202) {
+                passwordMessage.classList.add('visually-hidden');
+                passwordMessageSuccess.remove('visually-hidden');
+            }
+            else {
+                passwordMessage.classList.remove('visually-hidden');
+                passwordMessage.innerText = "Не удалось восстановить пароль"
             }
         });
 }

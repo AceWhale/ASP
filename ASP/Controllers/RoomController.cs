@@ -1,5 +1,6 @@
 ﻿using ASP.Data.DAL;
 using ASP.Data.Entities;
+using ASP.Middleware;
 using ASP.Models.Content.Location;
 using ASP.Models.Content.Room;
 using Microsoft.AspNetCore.Http;
@@ -30,10 +31,10 @@ namespace ASP.Controllers
             [FromQuery] int? year, [FromQuery] int? month*/)
         {
             var room = _dataAccessor.ContentDao.GetRoomBySlug(id);
-            if(room == null)
+            if (room == null)
             {
                 Response.StatusCode = StatusCodes.Status404NotFound;
-                return null;    
+                return null;
             }
             room.Reservations = room.Reservations
                 .Where(r => r.Date >= DateTime.Today).ToList();
@@ -86,20 +87,30 @@ namespace ASP.Controllers
             }
         }
 
-		[HttpGet("reserve/{id}")]
-		public List<Reservation> GetReservations(String id)
-		{
+        [HttpGet("reserve/{id}")]
+        public List<Reservation> GetReservations(String id)
+        {
             Room? room;
             lock (this)
             {
                 room = _dataAccessor.ContentDao.GetRoomBySlug(id);
             }
             return room?.Reservations;
-		}
+        }
 
-		[HttpPost("reserve")]
+        [HttpPost("reserve")]
         public String ReserveRoom([FromBody] ReserveRoomFormModel model)
         {
+            if (!(User.Identity?.IsAuthenticated ?? false))
+            {
+                var identity = User.Identities
+                    .FirstOrDefault(i => i.AuthenticationType == nameof(AuthTokenMiddleware));
+                if (identity == null)
+                {
+                    Response.StatusCode = StatusCodes.Status401Unauthorized;
+                    return HttpContext.Items[nameof(AuthTokenMiddleware)]?.ToString() ?? "";
+                }
+            }
             try
             {
                 _dataAccessor.ContentDao.ReserveRoom(model);
@@ -117,7 +128,7 @@ namespace ASP.Controllers
         [HttpDelete("reserve")]
         public String DropReservation([FromQuery] Guid reserveId)
         {
-            if(reserveId == default)
+            if (reserveId == default)
             {
                 Response.StatusCode = StatusCodes.Status400BadRequest;
                 return "Guid parse error";
@@ -136,10 +147,10 @@ namespace ASP.Controllers
             }
         }
 
-		[HttpPatch]
-		public Room? DoPatch(String slug)
-		{
-			return _dataAccessor.ContentDao.GetRoomBySlug(slug);
-		}
-	}
+        [HttpPatch]
+        public Room? DoPatch(String slug)
+        {
+            return _dataAccessor.ContentDao.GetRoomBySlug(slug);
+        }
+    }
 }

@@ -1,4 +1,6 @@
 ﻿using ASP.Data.Entities;
+using ASP.Models;
+using ASP.Models.Home.Model;
 using ASP.Services.Kdf;
 using Microsoft.EntityFrameworkCore;
 
@@ -111,6 +113,25 @@ namespace ASP.Data.DAL
                 _dataContext.SaveChanges();
             }
             return true;
+        }
+
+        public String RestorePassword(String email, String name)
+        {
+            User? user;
+            lock (_dblocker)
+            {
+                user = _dataContext.Users.FirstOrDefault(x => x.Email == email && x.Name == name);
+            }
+            if (user == null) return "";
+            String salt = RandomStringService.GenerateSalt(10);
+            String password = RandomStringService.GenerateOTP(8);
+            user.Salt = salt;
+            user.Derivedkey = _kdfService.DerivedKey(salt, password);
+            lock (_dblocker)
+            {
+                _dataContext.SaveChanges();
+            }
+            return password;
         }
     }
 }

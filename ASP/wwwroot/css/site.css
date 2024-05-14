@@ -55,3 +55,26 @@ body {
     text-decoration: none;
     color: inherit;
 }
+
+.calendar {
+    border: 1px solid gray;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.calendar-item {
+    border: 1px solid gray;
+    text-align: center;
+    width: 14.286%;
+}
+
+.item-free{
+    color: greenyellow;
+    cursor: pointer;
+}
+.item-past{
+    color: gray;
+}
+.item-reserved{
+    color: hotpink;
+}

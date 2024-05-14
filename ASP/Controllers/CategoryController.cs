@@ -5,6 +5,8 @@ using ASP.Data.DAL;
 using ASP.Models;
 using System.Security.Claims;
 using Microsoft.Extensions.Primitives;
+using System.Net;
+using ASP.Middleware;
 
 namespace ASP.Controllers
 {
@@ -30,38 +32,30 @@ namespace ASP.Controllers
 		[HttpPost]
 		public String DoPost([FromForm] CategoryPostModel model)
 		{
-			var authHeader = Request.Headers["Authorization"];
-			if(authHeader == StringValues.Empty)
+			/*	У проєкті є дві авторизації: через сесії та через токени.
+				Первинна авторизація за сесією (в силу того, що з неї починали)
+				Дані авторизації за токеном шукаємо за типом авторизації, яку ми
+				встановили як назва класу (AuthTokenMiddleware)
+			 */
+			var identity = User.Identities
+				.FirstOrDefault(i => i.AuthenticationType == nameof(AuthTokenMiddleware));
+			/*Токени:
+			 *Передаються за стандартною схемою - заголовком
+			 * Authorization: Bearer 1233242
+			 * де 1233242 - токен
+			 */
+			if(identity == null)
 			{
+				// якщо авторизація не пройдена, то повідомлення в Items
 				Response.StatusCode = StatusCodes.Status401Unauthorized;
-				return "Authentication required";
+				return HttpContext.Items[nameof(AuthTokenMiddleware)]?.ToString() ?? "";
 			}
-			String authValue = authHeader.First()!;
-			if(!authValue.StartsWith("Bearer "))
+			if (identity.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value != "Admin")
 			{
-                Response.StatusCode = StatusCodes.Status401Unauthorized;
-                return "Bearer scheme required";
-            }
-			String token = authValue[7..];
-			Guid tokenId;
-			try { tokenId = Guid.Parse(token); }
-			catch
-			{
-                Response.StatusCode = StatusCodes.Status401Unauthorized;
-                return "Token invalid: GUID required";
-            }
-			User? user = _dataAccessor.UserDao.GetUserByToken(tokenId);
-			if(user == null)
-			{
-                Response.StatusCode = StatusCodes.Status401Unauthorized;
-                return "Token invalid or expired";
-            }
-			if(user.Role != "Admin")
-			{
-                Response.StatusCode = StatusCodes.Status403Forbidden;
+				Response.StatusCode = StatusCodes.Status403Forbidden;
 				return "Access to API forbidden";
-            }
-            try
+			}
+			try
 			{
 				String? fileName = null;
 				if (model.Photo != null)
@@ -98,20 +92,20 @@ namespace ASP.Controllers
 			return "OK";
 		}
 
-        // метод, НЕ позначений атрибутом, буде викликано, якщо не знайдеться
-        // необхідний з позначених.Це дозволяє прийняти нестандартні запити
+		// метод, НЕ позначений атрибутом, буде викликано, якщо не знайдеться
+		// необхідний з позначених.Це дозволяє прийняти нестандартні запити
 		public String DoOther()
 		{
-            // дані про метод запиту - у Request. Method
-            if (Request.Method == "RESTORE")
+			// дані про метод запиту - у Request. Method
+			if (Request.Method == "RESTORE")
 			{
 				return DoRestore();
 			}
 			Response.StatusCode = StatusCodes.Status405MethodNotAllowed;
 			return "Method not Allowed";
 		}
-        // Другий НЕ позначений метод має бути private щоб не було конфлікту
-        private String DoRestore()
+		// Другий НЕ позначений метод має бути private щоб не було конфлікту
+		private String DoRestore()
 		{
 			// Через відсутність атрибутів, автоматичного зв'язування параметрі
 			// немає, параметри дістаємо з колекцій Request
@@ -123,12 +117,12 @@ namespace ASP.Controllers
 			catch
 			{
 				Response.StatusCode = StatusCodes.Status400BadRequest;
-                return "Empty or invalid id";
-            }
-            Response.StatusCode = StatusCodes.Status202Accepted;
-            return "RESTORE works with id: " + id;
+				return "Empty or invalid id";
+			}
+			Response.StatusCode = StatusCodes.Status202Accepted;
+			return "RESTORE works with id: " + id;
 		}
-    }
+	}
 	public class CategoryPostModel
 	{
 		[FromForm(Name = "category-name")]
@@ -144,6 +138,6 @@ namespace ASP.Controllers
 
 
 		[FromForm(Name = "category-photo")]
-		public IFormFile? Photo { get; set; } 
+		public IFormFile? Photo { get; set; }
 	}
 }
