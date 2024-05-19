@@ -42,7 +42,7 @@ namespace ASP.Controllers
             }
             else
             {
-                /* 
+                /*
 				   Http-cecii -- спосіб для збереження з боку сервера даних, що
 				   будуть доступними після перевантаження сторінки. 
 				   Налаштунвання: https://learn.microsoft.com/en-us/aspnet/core/fundamentals/app-state?view=aspnetcore-8.0
@@ -110,7 +110,7 @@ namespace ASP.Controllers
                 return "Empty or invalid inputs";
             }
             Response.StatusCode = StatusCodes.Status202Accepted;
-            if(password == "")
+            if (password == "")
             {
                 Response.StatusCode = StatusCodes.Status500InternalServerError;
                 return "Error generate password";
@@ -147,7 +147,14 @@ namespace ASP.Controllers
                 Response.StatusCode = StatusCodes.Status401Unauthorized;
                 return null;
             }
-            return _dataAccessor.UserDao.CreateTokenForUser(user);
+            Token? activeToken = _dataAccessor.UserDao.FindUserToken(user);
+            if (activeToken == null)
+            {
+                _logger.LogInformation("token expired, new token creating");
+                return _dataAccessor.UserDao.CreateTokenForUser(user); 
+            }
+            _logger.LogInformation("token findet");
+            return activeToken;
         }
     }
 }

@@ -45,6 +45,17 @@ namespace ASP.Data.DAL
             return user;
         }
 
+        public Token? FindUserToken(User user)
+        {
+            Token? userToken = _dataContext.Tokens.FirstOrDefault(t => t.UserId == user.Id);
+            DateTime today = DateTime.Now;
+            if (userToken == null || userToken.ExpireDt < today)
+            {
+                return null;
+            }
+            return userToken;
+        }
+
         public Token? CreateTokenForUser(User user)
         {
             return CreateTokenForUser(user.Id);

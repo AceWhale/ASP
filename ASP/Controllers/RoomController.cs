@@ -5,12 +5,15 @@ using ASP.Models.Content.Location;
 using ASP.Models.Content.Room;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
+using System.Security.Claims;
 
 namespace ASP.Controllers
 {
     [Route("api/room")]
     [ApiController]
-    public class RoomController(DataAccessor dataAccessor, ILogger<RoomController> logger) : ControllerBase
+    public class RoomController(DataAccessor dataAccessor, ILogger<RoomController> logger)
+        : BackendController
     {
         private readonly DataAccessor _dataAccessor = dataAccessor;
         private readonly ILogger<RoomController> _logger = logger;
@@ -101,16 +104,27 @@ namespace ASP.Controllers
         [HttpPost("reserve")]
         public String ReserveRoom([FromBody] ReserveRoomFormModel model)
         {
-            if (!(User.Identity?.IsAuthenticated ?? false))
+            if (!base.isAuthenticated)
             {
-                var identity = User.Identities
-                    .FirstOrDefault(i => i.AuthenticationType == nameof(AuthTokenMiddleware));
-                if (identity == null)
-                {
-                    Response.StatusCode = StatusCodes.Status401Unauthorized;
-                    return HttpContext.Items[nameof(AuthTokenMiddleware)]?.ToString() ?? "";
-                }
+                Response.StatusCode = StatusCodes.Status401Unauthorized;
+                return "Authorization failed";
             }
+
+            if (base.claims?.First(c => c.Type == ClaimTypes.Sid).Value
+                != model.UserId.ToString())
+            {
+                Response.StatusCode = StatusCodes.Status422UnprocessableEntity;
+                return "Ambiguous user identification";
+            }
+
+            Reservation? reservation = _dataAccessor.ContentDao
+                .GetReservation(model.RoomId, model.Date);
+            if (reservation != null)
+            {
+                Response.StatusCode = StatusCodes.Status422UnprocessableEntity;
+                return "Room is reserved for requested date";
+            }
+
             try
             {
                 _dataAccessor.ContentDao.ReserveRoom(model);
