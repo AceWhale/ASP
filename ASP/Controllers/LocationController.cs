@@ -24,11 +24,11 @@ namespace ASP.Controllers
 		}
 
 		[HttpPost]
-		public String Post([FromForm] LocationPostModel model)
+		public String Post(LocationFormModel model)
 		{
 			try
 			{
-                String? fileName = null;
+				String? fileName = null;
 				if (model.Photo != null)
 				{
 					string ext = Path.GetExtension(model.Photo.FileName);
@@ -49,15 +49,16 @@ namespace ASP.Controllers
 					description: model.Description,
 					CategoryId: model.CategoryId,
 					Stars: model.Stars,
-					PhotoUrl: fileName);
+					PhotoUrl: fileName,
+					slug: model.Slug);
 				Response.StatusCode = StatusCodes.Status201Created;
 				return "OK";
 			}
-			catch
+			catch (Exception ex)
 			{
-				Response.StatusCode = StatusCodes.Status400BadRequest;
-				return "Error";
-			}
+                Response.StatusCode = StatusCodes.Status400BadRequest;
+				return ex.Message;
+            }
 		}
 
 		[HttpPatch]
@@ -67,12 +68,24 @@ namespace ASP.Controllers
 		}
 	}
 
-	public class LocationPostModel
+	public class LocationFormModel
 	{
-		public String? Name { get; set; }
-		public String? Description { get; set; }
-		public Guid CategoryId { get; set; }
-		public int Stars { get; set; }
-		public IFormFile? Photo { get; set; }
-	}
+        [FromForm(Name = "category-id")]
+        public Guid CategoryId { get; set; }
+
+        [FromForm(Name = "loc-name")]
+        public String Name { get; set; } = null!;
+
+        [FromForm(Name = "loc-description")]
+        public String Description { get; set; } = null!;
+
+        [FromForm(Name = "loc-slug")]
+        public String Slug { get; set; } = null!;
+
+        [FromForm(Name = "loc-stars")]
+        public int Stars { get; set; }
+
+        [FromForm(Name = "loc-photo")]
+        public IFormFile Photo { get; set; } = null!;
+    }
 }
