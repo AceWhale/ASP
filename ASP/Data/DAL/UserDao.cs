@@ -59,6 +59,17 @@ namespace ASP.Data.DAL
             return userToken;
         }
 
+        public Token? CheckExpiredToken(Guid tokenId)
+        {
+            Token? token = _dataContext.Tokens.FirstOrDefault(t => t.id == tokenId);
+            DateTime today = DateTime.Now;
+            if (token != null && token.ExpireDt < today)
+            {
+                return null;
+            }
+            return token;
+        }
+
         public Token? CreateTokenForUser(User user)
         {
             return CreateTokenForUser(user.Id);
