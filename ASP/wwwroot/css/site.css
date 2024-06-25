@@ -68,13 +68,20 @@ body {
     width: 14.286%;
 }
 
+.day-header {
+    font-weight: bold;
+    text-align: center;
+}
+
 .item-free{
     color: greenyellow;
     cursor: pointer;
 }
 .item-past{
+    cursor: default;
     color: gray;
 }
 .item-reserved{
+    cursor: pointer;
     color: hotpink;
 }
