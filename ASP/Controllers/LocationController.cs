@@ -47,7 +47,7 @@ namespace ASP.Controllers
 		[HttpPost]
 		public String Post(LocationFormModel model)
 		{
-            Console.WriteLine(model.CategoryId);
+            if (getAdminAuthMessage() is String msg) { return msg; }
             try
             {
 				String? fileName = null;
