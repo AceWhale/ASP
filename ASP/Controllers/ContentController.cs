@@ -1,4 +1,5 @@
 ﻿using ASP.Data.DAL;
+using ASP.Data.Entities;
 using ASP.Models.Content.Category;
 using ASP.Models.Content.Index;
 using ASP.Models.Content.Location;
@@ -48,6 +49,16 @@ namespace ASP.Controllers
                 {
                     Location = loc,
                     Rooms = _dataAccessor.ContentDao.GetRooms(loc.Id)
+                });
+        }
+        public IActionResult SearchLocation([FromRoute] String id)
+        {
+            List<Location> loc = _dataAccessor.ContentDao.GetLocationsByName(id);
+            return loc == null
+                ? View("NotFound")
+                : View(new ContentAllLocationPageModel()
+                {
+                    Location = _dataAccessor.ContentDao.GetLocationsByName(id)
                 });
         }
 

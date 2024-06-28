@@ -36,7 +36,7 @@ builder.Services.AddDbContext<DataContext>(
 builder.Services.AddSingleton<DataAccessor>();
 builder.Services.AddSingleton<IKdfService, Pbkdf1Service>();
 builder.Services.AddSingleton<IEmailService, GmailService>();
-builder.Services.AddHostedService<ExpiredTokenCleanService>();
+builder.Services.AddHostedService<ExpiredReserveCleanService>();
 
 // Налаштування Http-сесiй
 builder.Services.AddDistributedMemoryCache();

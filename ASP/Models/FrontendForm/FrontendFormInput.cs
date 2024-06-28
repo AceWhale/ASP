@@ -31,5 +31,6 @@ namespace ASP.Models.FrontendForm
 
         [FromForm(Name = "user-avatar")]
         public IFormFile Photo { get; set; } = null!;
+
     }
 }

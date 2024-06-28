@@ -7,7 +7,7 @@
     ? Guid.Parse(Context.User.Claims.First(claim => claim.Type == ClaimTypes.Sid).Value)
     : null;
 }
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <div class="row p-5">
     <div class="col col-4 card" style="padding: 20px">
         <h1>Room: @Model.Room.Name</h1>
@@ -107,6 +107,19 @@
         @if (freedays == 0)
         {
             <b>У данному мiсяцi немаэ вiльних днiв</b>
+        }
+        @if(isAuthenticated)
+        {
+            <form id="number-form" enctype="multipart/form-data">
+                <div class="card" style="margin-left:20px; margin-top:20px;">
+                    <p style="margin:10px;">If you have any questions, you can leave your phone number for consultation</p>
+                    <div class="input-group mb-3">
+                        <input id="user-phone" name="user-phone" type="text" class="form-control" placeholder="Phone" aria-label="Phone" aria-describedby="button-phone">
+                        <input type="hidden" name="user-id" value="@(userId)">
+                        <button type="submit" class="btn btn-outline-secondary">Send</button>
+                    </div>
+                </div>
+            </form>
         }
     </div>
 </div>

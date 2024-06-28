@@ -221,6 +221,12 @@ namespace ASP.Data.DAL
             }
         }
 
+        public List<Location> GetLocationsByName(String Name)
+        {
+            var loc = _context.Locations.Where(l => l.Name.Contains(Name) && l.DeleteDt == null).ToList();
+            return loc;
+        }
+
         public void AddRoom(String name, String description,
             String photoUrl, String slug, Guid locationId, int stars,
             Double dailyPrice)
@@ -263,6 +269,12 @@ namespace ASP.Data.DAL
                 res = [.. _context.Rooms.Where(r => r.LocationId == locationId).ToList()];
             }
             return res;
+        }
+
+        public Room? GetRoomById(String id)
+        {
+            Room? room = _context.Rooms.FirstOrDefault(r => r.Id == Guid.Parse(id));
+            return room == null ? null : room;
         }
 
         public Room? GetRoomBySlug(String slug)

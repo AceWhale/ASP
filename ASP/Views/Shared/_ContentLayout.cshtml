@@ -11,8 +11,8 @@
     ? Context.User.Claims.First(claim => claim.Type == ClaimTypes.UserData).Value
     : "";
     String emailConfirmCode = Context.User.Claims.FirstOrDefault(claim => claim.Type == "EmailConfirmCode")?.Value ?? "";
-
     bool isEmailConfirmed = emailConfirmCode == "";
+    String Search = "";
 }
 
 <!DOCTYPE html>
@@ -55,9 +55,9 @@
                         }
                     </ul>
                     <div class="input-group" style="margin-left:10px; margin-right:10px">
-                        <input type="text" class="form-control" placeholder="Enter Location" aria-label="Enter Location" aria-describedby="basic-addon2" value="">
+                        <input id="inputValue" type="text" class="form-control" placeholder="Enter Location" aria-label="Enter Location" aria-describedby="basic-addon2" oninput="updateLink()">
                         <div class="input-group-append">
-                            <button class="btn btn-outline-secondary" type="button">Search</button>
+                            <a id="dynamicLink" class="btn btn-outline-secondary" type="button" asp-area="" asp-controller="Content" asp-action="SearchLocation" asp-route-id="">Search</a>
                         </div>
                     </div>
                     @if (isAuthenticated)
@@ -71,7 +71,7 @@
                             </button>
                         }
                         <a class="nav-link text-dark" asp-area="" title="Вихiд"
-                           asp-controller="Home" asp-route-logout="true" asp-action="Index"><i class="bi bi-box-arrow-right"></i></a>
+                           asp-controller="Content" asp-action="Index" asp-route-logout="true"><i class="bi bi-box-arrow-right"></i></a>
                     }
                     else
                     {

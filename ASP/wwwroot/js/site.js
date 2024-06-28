@@ -107,6 +107,23 @@
             });
         }
     }
+    if (form.id == 'number-form') {
+        e.preventDefault();
+        let formData = new FormData(form);
+        userId = formData.get("user-id");
+        phone = formData.get("user-phone");
+        fetch(`/api/auth?userid=${userId}&phone=${phone}`, {
+            method: 'ADD_PHONE',
+            body: formData
+        }).then(r => {
+            if (r.status < 300) {
+                showSuccessMessage();
+            }
+            else {
+                showFailMessage();
+            }
+        });
+    }
     // на інші форми ми не вплюваємо
 });
 document.addEventListener('DOMContentLoaded', function () {
@@ -495,6 +512,33 @@ function serveReserveButtons() {
             });
         });
     }
+}
+
+
+
+function showSuccessMessage() {
+    Swal.fire({
+        title: 'Успех!',
+        text: 'Номер был успешно добавлен.',
+        icon: 'success',
+        confirmButtonText: 'Ок'
+    });
+}
+
+function showFailMessage() {
+    Swal.fire({
+        title: 'Упс!',
+        text: 'Не удалось отправить номер. Убедитесь в правильном написании',
+        icon: 'error',
+        confirmButtonText: 'Ок'
+    });
+}
+
+function updateLink() {
+    var inputValue = document.getElementById("inputValue").value;
+    var link = document.getElementById("dynamicLink");
+    var baseUrl = inputValue;
+    link.href = baseUrl.replace('__ID__', encodeURIComponent(inputValue));
 }
 
 /* CRUD
